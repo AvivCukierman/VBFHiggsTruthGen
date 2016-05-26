@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Definitions.h"
-#include "PileupAnalysis.h"
+#include "Analysis.h"
 #include "Configuration.h"
 
 using namespace std;
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
       cout << "\tCurrent: " << iev << endl;
     analysis.AnalyzeEvent(iev, settings.pileup);
   }  
-  cout << "Pileup Analysis Complete!" << endl;
+  cout << "VBFHiggs Analysis Complete!" << endl;
   
   return 0;
 }

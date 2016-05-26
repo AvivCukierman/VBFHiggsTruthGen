@@ -1,7 +1,7 @@
 //-*-c++-*-
 
-#ifndef  PileupAnalysis_H
-#define  PileupAnalysis_H
+#ifndef  Analysis_H
+#define  Analysis_H
 
 #include <sstream>
 
