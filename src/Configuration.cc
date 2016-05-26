@@ -14,7 +14,7 @@ Configuration::Configuration(int argc, char* argv[]){
     gen_desc.add_options()
       ("help", "produce help message")
       ("Debug",     po::value<int>(&fDebug) ->default_value(0) ,     "Debug flag")
-      ("OutFile",   po::value<string>(&outName)->default_value("Pileup.root"), "output file name")
+      ("OutFile",   po::value<string>(&outName)->default_value("VBFHiggs.root"), "output file name")
       ("Seed",      po::value<int>(&seed)->default_value(-1), "Seed. -1 means random seed");
 
     po::options_description sim_flag("Simulation Flags");
@@ -31,7 +31,7 @@ Configuration::Configuration(int argc, char* argv[]){
 
     po::options_description sim_desc("Simulation Settings");
     sim_desc.add_options()
-      ("NEvents",   po::value<int>(&nEvents)->default_value(1) ,    "Number of Events ")
+      ("nevents",   po::value<int>(&nEvents)->default_value(1) ,    "Number of Events ")
       ("Pileup",    po::value<int>(&pileup)->default_value(0), "Number of Additional Interactions")
       ("BunchSize", po::value<float>(&bunchsize)->default_value(0.075), "Size of Proton Bunches")
       ("Profile",   po::value<int>(&profile)->default_value(0), "Bunch Profile Type:\n - 0: Gaussian\n - 1: PseudoRectangular")
