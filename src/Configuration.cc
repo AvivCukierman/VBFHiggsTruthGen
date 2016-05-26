@@ -132,8 +132,9 @@ Configuration::Configuration(int argc, char* argv[]){
 
 void Configuration::print(){
 
-  cout << endl << "=================================================================" << endl;
-  cout << "=                        Timing Analysis                        =" << endl;
+  cout << endl;
+  cout << "=================================================================" << endl;
+  cout << "=                        VBFHiggs Analysis                      =" << endl;
   cout << "=================================================================" << endl << endl;
 
   cout << "Settings:" << endl;

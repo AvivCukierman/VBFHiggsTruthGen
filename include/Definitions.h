@@ -33,5 +33,6 @@ const double PI = M_PI;
 
 typedef std::pair<double,double> CorrInfo; // (time,eta)
 typedef std::vector<fastjet::PseudoJet> JetVector;
+typedef vector<float> branch;
 
 #endif

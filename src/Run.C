@@ -19,8 +19,8 @@ int main(int argc, char* argv[]){
   settings.ConfigurePythiaSignal(pythiaHS.get());
   settings.ConfigurePythiaPileup(pythiaPU.get());
     
-  // PileupAnalysis
-  PileupAnalysis analysis(pythiaHS.get(),pythiaPU.get(), settings);
+  // Analysis
+  Analysis analysis(pythiaHS.get(),pythiaPU.get(), settings);
   analysis.Initialize(settings.minEta,settings.maxEta,settings.dtype,2*settings.seed);
   
   // Event loop
