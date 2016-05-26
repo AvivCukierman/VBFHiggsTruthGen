@@ -9,13 +9,13 @@ CXXFLAGS = -O2 -Wall -Wextra -std=c++0x -g
 
 .PHONY: clean debug all
 
-all: setup Pileup
+all: setup Run 
 
 setup:
 	mkdir -p lib
 
-Pileup:  lib/Pileup.so lib/PileupAnalysis.so lib/Configuration.so
-	$(CXX) lib/Pileup.so lib/PileupAnalysis.so lib/Configuration.so -o $@ \
+Run:  lib/Run.so lib/Analysis.so lib/Configuration.so
+	$(CXX) lib/Run.so lib/Analysis.so lib/Configuration.so -o $@ \
 	$(CXXFLAGS) -Wno-shadow  \
 	`root-config --glibs` -lEG -lEGPythia8 \
 	-I./include -L./lib \
@@ -23,7 +23,7 @@ Pileup:  lib/Pileup.so lib/PileupAnalysis.so lib/Configuration.so
 	-L$(PYTHIA8LOCATION)/lib -lpythia8 -llhapdfdummy \
 	-L$(BOOSTLIBLOCATION) -lboost_program_options 
 
-lib/Pileup.so: src/Pileup.C lib/PileupAnalysis.so   
+lib/Run.so: src/Run.C lib/Analysis.so   
 	$(CXX) -o $@ -c $<  \
 	$(CXXFLAGS) -Wno-shadow -fPIC -shared \
 	`$(FASTJETLOCATION)/bin/fastjet-config --cxxflags` \
@@ -32,7 +32,7 @@ lib/Pileup.so: src/Pileup.C lib/PileupAnalysis.so
 	-I $(BOOSTINCDIR) \
 	`root-config --cflags` 
 
-lib/PileupAnalysis.so : src/PileupAnalysis.cc include/PileupAnalysis.h 
+lib/Analysis.so : src/Analysis.cc include/Analysis.h 
 	$(CXX) -o $@ -c $<  \
 	$(CXXFLAGS) -Wno-shadow -fPIC -shared \
 	`$(FASTJETLOCATION)/bin/fastjet-config --cxxflags` \
@@ -49,11 +49,11 @@ lib/Configuration.so : src/Configuration.cc include/Configuration.h
 	`root-config --cflags --libs`
 
 clean:
-	rm -rf Pileup
+	rm -rf Run 
 	rm -rf lib
 	rm -f *~
 
 install:
-	install Pileup -t ${HOME}/local/bin
+	install Run -t ${HOME}/local/bin
 	install setupPileup.sh -t ${HOME}/local/bin
 	install scripts/Pileup.sh -t ${HOME}/local/bin
