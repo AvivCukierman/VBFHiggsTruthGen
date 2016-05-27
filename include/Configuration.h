@@ -34,7 +34,7 @@ public:
   float  maxEta;  
   float  pThatmin;
   float  pThatmax;
-  float  boson_mass;
+  float  scalar_mass;
 
   float  phi;
   float  psi;

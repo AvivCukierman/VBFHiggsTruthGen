@@ -30,6 +30,8 @@ enum smearMode {Off,Z,T,ZT};
 
 const double LIGHTSPEED = 299792458.;
 const double PI = M_PI;
+const double H_MASS = 125.09; 
+const double H_WIDTH = 0.004; //4 MeV SM prediction
 
 typedef std::pair<double,double> CorrInfo; // (time,eta)
 typedef std::vector<fastjet::PseudoJet> JetVector;
