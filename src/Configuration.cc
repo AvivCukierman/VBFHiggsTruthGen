@@ -91,10 +91,9 @@ void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
   hs->readString(ss.str());
   
   if(proc == 1){
-    throw std::invalid_argument("process 1 doesn't work yet");
-    hs->readString("HiggsSM:ff2Hff(t:ZZ) = on");
-    hs->readString("HiggsSM:ff2Hff(t:WW) = on");
     hs->readString("Higgs:useBSM = on");
+    hs->readString("HiggsBSM:ff2H1ff(t:ZZ) = on");
+    hs->readString("HiggsBSM:ff2H1ff(t:WW) = on");
     ss.str("");
     ss << "35:m0 = " << H_MASS;
     hs->readString(ss.str());
