@@ -10,6 +10,8 @@
 #include "TTree.h"
 #include "TH2F.h"
 
+#include "TLorentzVector.h"
+
 #include "Configuration.h"
 #include "Definitions.h"
 #include "ParticleInfo.h"

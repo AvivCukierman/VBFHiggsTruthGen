@@ -196,6 +196,14 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
     }
   }//loop particles*/
 
+  /*TLorentzVector v1,v2,a;
+  if(gammapt->size()==2){
+    v1.SetPtEtaPhiM((*gammapt)[0],(*gammaeta)[0],(*gammaphi)[0],(*gammam)[0]);
+    v2.SetPtEtaPhiM((*gammapt)[1],(*gammaeta)[1],(*gammaphi)[1],(*gammam)[1]);
+    a = v1+v2;
+    cout << a.M() << endl;
+  }*/
+
   for(auto jet=selectedJets.begin(); jet!=selectedJets.end(); ++jet){
     j0pt  ->push_back(jet->pt());
     j0eta ->push_back(jet->eta());
@@ -219,6 +227,7 @@ void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceA
     bge->set_particles(particlesForJets);
 
     fastjet::Subtractor subtractor(bge.get());    
+    //subtractor.set_use_rho_m(true);
     JetVector inclusiveJets = sorted_by_pt(clustSeq.inclusive_jets(10.));
     JetVector subtractedJets = subtractor(inclusiveJets);
 
