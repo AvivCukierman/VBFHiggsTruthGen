@@ -26,6 +26,7 @@ class Analysis{
   int  ftest;
   bool  fDebug;
   string fOutName;
+  string fOutDir;
   
   TFile *tF;
   TTree *tT;

@@ -15,6 +15,7 @@ Configuration::Configuration(int argc, char* argv[]){
       ("help", "produce help message")
       ("Debug",     po::value<int>(&fDebug) ->default_value(0) ,     "Debug flag")
       ("OutFile",   po::value<string>(&outName)->default_value("VBFHiggs.root"), "output file name")
+      ("OutDir",    po::value<string>(&outDir)->default_value("data"), "output directory")
       ("Seed",      po::value<int>(&seed)->default_value(-1), "Seed. -1 means random seed");
 
     po::options_description sim_flag("Simulation Flags");

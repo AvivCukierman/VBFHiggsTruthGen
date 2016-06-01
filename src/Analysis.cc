@@ -35,6 +35,7 @@ Analysis::Analysis(Pythia8::Pythia *pythiaHS, Pythia8::Pythia *pythiaPU, Configu
 
   ftest = 0;
   fOutName = q.outName;
+  fOutDir = q.outDir;
 
   if(fDebug) 
     cout << "Analysis::Analysis End " << endl;
@@ -65,7 +66,9 @@ Analysis::~Analysis(){
 // Begin method
 void Analysis::Initialize(float minEta, float maxEta, distribution dtype, int seed){
    // Declare TTree
-   tF = new TFile(fOutName.c_str(), "RECREATE");
+   //std::stringstream outpath;
+   //outpath << fOutDir << "/" << fOutName;
+   tF = new TFile((fOutDir + "/" + fOutName).c_str(), "RECREATE");
    tT = new TTree("tree", "Event Tree for VBFHiggs");
    //rnd.reset(new TimingDistribution(bunchsize,seed,phi,psi));
    _dtype=dtype;

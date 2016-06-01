@@ -22,6 +22,7 @@ public:
   void print();
   
   string outName;
+  string outDir;
 
   int    pileup;
   int    nEvents;
