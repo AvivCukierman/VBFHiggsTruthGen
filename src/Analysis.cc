@@ -66,9 +66,7 @@ Analysis::~Analysis(){
 // Begin method
 void Analysis::Initialize(float minEta, float maxEta, distribution dtype, int seed){
    // Declare TTree
-   //std::stringstream outpath;
-   //outpath << fOutDir << "/" << fOutName;
-   tF = new TFile((fOutDir + "/" + fOutName).c_str(), "RECREATE");
+   tF = new TFile((fOutDir + "/" + fOutName + ".root").c_str(), "RECREATE");
    tT = new TTree("tree", "Event Tree for VBFHiggs");
    //rnd.reset(new TimingDistribution(bunchsize,seed,phi,psi));
    _dtype=dtype;

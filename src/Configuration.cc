@@ -15,7 +15,7 @@ Configuration::Configuration(int argc, char* argv[]){
     gen_desc.add_options()
       ("help", "produce help message")
       ("Debug",      po::value<int>(&fDebug) ->default_value(0) ,     "Debug flag")
-      ("OutFile",    po::value<string>(&outName)->default_value("VBFHiggs.root"), "Output file name. Overridden if --AutoName is specified.")
+      ("OutFile",    po::value<string>(&outName)->default_value("VBFHiggs"), "Output file name. Overridden if --AutoName is specified.")
       ("AutoName,a", po::bool_switch(&autoName), "Automatically set the output file name based on the process.")
       ("OutDir",     po::value<string>(&outDir)->default_value("data"), "output directory")
       ("Seed",       po::value<int>(&seed)->default_value(-1), "Seed. -1 means random seed");
@@ -71,24 +71,29 @@ void Configuration::print(){
 
   cout << "Settings:" << endl;
   for (po::variables_map::const_iterator itr=vm.begin();itr != vm.end();++itr){
-    printf("%15s\t",itr->first.c_str());
-    
-    try { 
-      cout << "= " << itr->second.as<double>() << std::endl;
-      continue;
-    } catch(...) {/* do nothing */ }
-    try { 
-      cout << "= " << itr->second.as<float>() << std::endl;
-      continue;
-    } catch(...) {/* do nothing */ }
-    try { 
-      cout << "= " << itr->second.as<int>() << std::endl;
-      continue;
-    } catch(...) {/* do nothing */ }
-    try { 
-      cout << "= " << itr->second.as<std::string>() << std::endl;
-      continue;
-    } catch(...) {/* do nothing */ }
+    if(itr->first.compare("OutFile")==0){
+      cout << "\t" << "OutFile = " << outDir << "/" << outName << ".root" << endl;
+    }
+    else{
+      printf("%15s\t",itr->first.c_str());
+      
+      try { 
+        cout << "= " << itr->second.as<double>() << std::endl;
+        continue;
+      } catch(...) {/* do nothing */ }
+      try { 
+        cout << "= " << itr->second.as<float>() << std::endl;
+        continue;
+      } catch(...) {/* do nothing */ }
+      try { 
+        cout << "= " << itr->second.as<int>() << std::endl;
+        continue;
+      } catch(...) {/* do nothing */ }
+      try { 
+        cout << "= " << itr->second.as<std::string>() << std::endl;
+        continue;
+      } catch(...) {/* do nothing */ }
+    }
   }
   cout << "\t" << "Process Name = " << procName << endl;
 }
