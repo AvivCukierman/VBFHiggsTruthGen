@@ -23,6 +23,8 @@ public:
   
   string outName;
   string outDir;
+  bool autoName;
+  string procName;
 
   int    pileup;
   int    nEvents;

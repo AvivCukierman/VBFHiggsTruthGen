@@ -8,15 +8,17 @@ Configuration::Configuration(int argc, char* argv[]){
     filterCharge=true;
     magfield = false;
     storeallparticles = false;
-    int profile;
+    autoName=false;
+    //int profile;
 
-    po::options_description gen_desc("Allowed options");
+    po::options_description gen_desc("General Options");
     gen_desc.add_options()
       ("help", "produce help message")
-      ("Debug",     po::value<int>(&fDebug) ->default_value(0) ,     "Debug flag")
-      ("OutFile",   po::value<string>(&outName)->default_value("VBFHiggs.root"), "output file name")
-      ("OutDir",    po::value<string>(&outDir)->default_value("data"), "output directory")
-      ("Seed",      po::value<int>(&seed)->default_value(-1), "Seed. -1 means random seed");
+      ("Debug",      po::value<int>(&fDebug) ->default_value(0) ,     "Debug flag")
+      ("OutFile",    po::value<string>(&outName)->default_value("VBFHiggs.root"), "Output file name. Overridden if --AutoName is specified.")
+      ("AutoName,a", po::bool_switch(&autoName), "Automatically set the output file name based on the process.")
+      ("OutDir",     po::value<string>(&outDir)->default_value("data"), "output directory")
+      ("Seed",       po::value<int>(&seed)->default_value(-1), "Seed. -1 means random seed");
 
     po::options_description sim_flag("Simulation Flags");
     sim_flag.add_options()
@@ -44,9 +46,16 @@ Configuration::Configuration(int argc, char* argv[]){
 	exit(0);
     }
 
-    print();
-
     cout << "\t";
+
+    if(proc==1) procName = "ggH2aa2qqgammagamma";
+    else if(proc==2) procName = "qqbar2gammagamma"; 
+    else if(proc==3) procName = "VBFH2aa2qqgammagamma";
+    else if(proc==4) procName = "VBFH2inv"; 
+    else cerr << "Process not implemented" << endl; 
+    if(autoName) outName = procName;
+
+    print();
 
     seed=getSeed(seed);
         
@@ -81,6 +90,7 @@ void Configuration::print(){
       continue;
     } catch(...) {/* do nothing */ }
   }
+  cout << "\t" << "Process Name = " << procName << endl;
 }
 
 void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
