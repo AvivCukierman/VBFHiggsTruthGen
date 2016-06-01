@@ -27,7 +27,7 @@ Configuration::Configuration(int argc, char* argv[]){
       ("Pileup",    po::value<int>(&pileup)->default_value(0), "Number of Additional Interactions.")
       ("BunchSize", po::value<float>(&bunchsize)->default_value(0.075), "Size of Proton Bunches")
       ("MinEta",    po::value<float>(&minEta)->default_value(0.0), "Minimum (abs) Pseudorapidity for Particles")
-      ("MaxEta",    po::value<float>(&maxEta)->default_value(4.3), "Minimum (abs) Pseudorapidity for Particles")
+      ("MaxEta",    po::value<float>(&maxEta)->default_value(5.0), "Minimum (abs) Pseudorapidity for Particles")
       ("Proc",      po::value<int>(&proc)->default_value(2), "Process:\n - 1: VBFHiggs->xxyy (x,y=gluon,photon)\n  - 2: VBF H->inv")
       //("pThatMin",  po::value<float>(&pThatmin)->default_value(100), "pThatMin for QCD")
       //("pThatMax",  po::value<float>(&pThatmax)->default_value(500), "pThatMax for QCD")
@@ -89,8 +89,41 @@ void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
   std::stringstream ss; 
   ss << "Random:seed = " << seed;
   hs->readString(ss.str());
-  
+ 
+  //ggH2aa2qqgammagamma
   if(proc == 1){
+    hs->readString("Higgs:useBSM = on");
+    hs->readString("HiggsBSM:gg2H1 = on");
+    ss.str("");
+    ss << "35:m0 = " << H_MASS;
+    hs->readString(ss.str());
+    ss.str("");
+    ss << "35:mWidth = " << H_WIDTH;
+    hs->readString(ss.str());
+    hs->readString("35:doForceWidth = on");
+    hs->readString("35:onMode = off");
+    hs->readString("35:oneChannel = 1 1 100 36 36");
+    hs->readString("35:onIfAny = 36"); //h->aa
+    hs->readString("36:onMode = off");
+    hs->readString("36:oneChannel = 1 0.5 100 22 22"); //a->gammagamma
+    hs->readString("36:addChannel = 1 0.5 100 21 21"); //a->gg
+    hs->readString("36:onIfAny = 21 22");
+    ss.str("");
+    ss << "36:m0 = " << scalar_mass;
+    hs->readString(ss.str());
+    hs->readString("36:mWidth = 0.01"); //narrow width
+    hs->readString("36:mMin = 29.5");
+    hs->readString("36:mMax = 30.5");
+    hs->readString("36:tau0 = 0"); //scalar lifetime
+    hs->init(2212 /* p */, 2212 /* p */, 14000. /* TeV */); //this has to be the last line!
+  }
+  //ffbar2gammagamma
+  else if(proc == 2){
+    hs->readString("PromptPhoton:ffbar2gammagamma = on");
+    //hs->readString("TimeShower:weakShower = on");
+    hs->init(2212 /* p */, 2212 /* p */, 14000. /* TeV */); //this has to be the last line!
+  }
+  else if(proc == 3){
     hs->readString("Higgs:useBSM = on");
     hs->readString("HiggsBSM:ff2H1ff(t:ZZ) = on");
     hs->readString("HiggsBSM:ff2H1ff(t:WW) = on");
@@ -117,7 +150,7 @@ void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
     hs->readString("36:tau0 = 0"); //scalar lifetime
     hs->init(2212 /* p */, 2212 /* p */, 14000. /* TeV */); //this has to be the last line!
   }
-  else if(proc == 2){
+  else if(proc == 4){
     hs->readString("HiggsSM:ff2Hff(t:ZZ) = on");
     hs->readString("HiggsSM:ff2Hff(t:WW) = on");
     hs->readString("25:m0 = 125");
