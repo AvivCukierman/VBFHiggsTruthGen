@@ -48,17 +48,17 @@ Analysis::~Analysis(){
     delete tF;
   }
 
-  if(clpt != NULL){
-    delete clpt;
-    delete clphi;
-    delete cleta;
-    delete clm;
-    delete clpdgid;
+  if(j0pt != NULL){
+    delete gammapt;
+    delete gammaphi;
+    delete gammaeta;
+    delete gammam;
 
     delete j0pt;
     delete j0phi;
     delete j0eta;
     delete j0m;
+    delete j0id;
   }
 }
 
@@ -92,16 +92,16 @@ void Analysis::Initialize(float minEta, float maxEta, distribution dtype, int se
  
    DeclareBranches();
    
-   clpt = new branch();  
-   clphi = new branch();  
-   cleta = new branch();  
-   clm = new branch();  
-   clpdgid = new branch();
+   gammapt = new branch();  
+   gammaphi = new branch();  
+   gammaeta = new branch();  
+   gammam = new branch();  
 
    j0pt = new branch();  
    j0phi = new branch();  
    j0eta = new branch();  
    j0m = new branch();  
+   j0id = new branch();
 
    ResetBranches();
    
@@ -181,19 +181,27 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
   //selectedTruthJets = sorted_by_pt(clustSeqTruth.inclusive_jets(10.));
 
   for(unsigned int icl=0;icl<particlesForJets.size();++icl){
-    clpt    ->push_back(particlesForJets[icl].pt());
+    /*clpt    ->push_back(particlesForJets[icl].pt());
     clphi   ->push_back(particlesForJets[icl].phi());
     cleta   ->push_back(particlesForJets[icl].eta());
-    clm     ->push_back(particlesForJets[icl].m());
-    clpdgid->push_back(particlesForJets[icl].user_info<ParticleInfo>().pdg_id());
-  }//loop particles
+    clm     ->push_back(particlesForJets[icl].m());*/
+    auto cl = particlesForJets[icl];
+    int id = cl.user_info<ParticleInfo>().pdg_id();
+    if(id==22 && cl.pt()>10){ //gamme with pt>10 GeV
+      gammapt->push_back(cl.pt());
+      gammaeta->push_back(cl.eta());
+      gammaphi->push_back(cl.phi());
+      gammam->push_back(cl.m());
 
-  for(unsigned int ijet=0; ijet<selectedJets.size(); ++ijet){
-    fastjet::PseudoJet jet = selectedJets[ijet];
-    j0pt  ->push_back(jet.perp());
-    j0eta ->push_back(jet.eta());
-    j0phi ->push_back(jet.phi());
-    j0m   ->push_back(jet.m());
+    }
+  }//loop particles*/
+
+  for(auto jet=selectedJets.begin(); jet!=selectedJets.end(); ++jet){
+    j0pt  ->push_back(jet->pt());
+    j0eta ->push_back(jet->eta());
+    j0phi ->push_back(jet->phi());
+    j0m   ->push_back(jet->m());
+    j0id  ->push_back(jet->user_info<ParticleInfo>().pdg_id());
   }
 
   //FillTruthTree(selectedTruthJets);
@@ -220,9 +228,20 @@ void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceA
     
     //select jets with pt > 10
     selectedJets.clear();
+    int i=0;
     for( auto ijet = allSelectedJets.begin(); ijet != allSelectedJets.end(); ++ijet){
-      if(ijet->pt() >= 10)
+      float jetpt = ijet->pt();
+      if(jetpt >= 10){
 	selectedJets.push_back(*ijet);
+        JetVector constituents = sorted_by_pt(ijet->constituents());
+        auto cons0 = constituents.begin();
+        if(cons0->has_user_info()){
+          int pdgid = cons0->user_info<ParticleInfo>().pdg_id();
+          selectedJets[i].set_user_info(new ParticleInfo(pdgid,i,0,false,jetpt));  
+        }
+        else cerr << "Particle does not have pdg id" << endl;
+      }
+      i++;
     }
   }
   catch(...){
@@ -264,16 +283,16 @@ void Analysis::DeclareBranches(){
   //tT->Branch("tvtxspread",&ftvtxspread,"tvtxspread/F"); 
   //tT->Branch("zpu","std::vector<float>",&zpu);
 
-  tT->Branch("clpt","std::vector<float>",&clpt);
-  tT->Branch("clphi","std::vector<float>",&clphi);
-  tT->Branch("cleta","std::vector<float>",&cleta);
-  tT->Branch("clm","std::vector<float>",&clm);
-  tT->Branch("clpdgid","std::vector<float>",&clpdgid);
+  tT->Branch("gammapt","std::vector<float>",&gammapt);
+  tT->Branch("gammaphi","std::vector<float>",&gammaphi);
+  tT->Branch("gammaeta","std::vector<float>",&gammaeta);
+  tT->Branch("gammam","std::vector<float>",&gammam);
 
   tT->Branch("j0pt","std::vector<float>",&j0pt);
   tT->Branch("j0phi","std::vector<float>",&j0phi);
   tT->Branch("j0eta","std::vector<float>",&j0eta);
   tT->Branch("j0m","std::vector<float>",&j0m);
+  tT->Branch("j0id","std::vector<float>",&j0id);
 
   //tT->Branch("truth","std::vector<float>",&j0cltruth);
   //tT->Branch("pu","std::vector<float>",&j0clpu);
@@ -288,14 +307,14 @@ void Analysis::ResetBranches(){
       fTEventNumber                 = -999;
       fTNPV = -1;
 
-      clpt->clear();
-      clphi->clear();
-      cleta->clear();
-      clm->clear();
-      clpdgid->clear();
+      gammapt->clear();
+      gammaphi->clear();
+      gammaeta->clear();
+      gammam->clear();
 
       j0pt->clear();
       j0phi->clear();
       j0eta->clear();
       j0m->clear();
+      j0id->clear();
 }

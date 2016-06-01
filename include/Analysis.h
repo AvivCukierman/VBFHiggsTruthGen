@@ -52,16 +52,16 @@ class Analysis{
   float fzvtxspread;
   float ftvtxspread;
   
-  branch *clpt;
-  branch *clphi;
-  branch *cleta;
-  branch *clm;
-  branch *clpdgid;
+  branch *gammapt;
+  branch *gammaphi;
+  branch *gammaeta;
+  branch *gammam;
 
   branch *j0pt;
   branch *j0phi;
   branch *j0eta;
   branch *j0m;
+  branch *j0id;
 
 
   bool randomZ;
