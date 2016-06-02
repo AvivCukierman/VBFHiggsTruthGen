@@ -100,30 +100,18 @@ void Configuration::print(){
 
 void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
 
-  hs->readString("Print:quiet=on");
+  hs->readString("Print:quiet=off");
   hs->readString("Random:setSeed = on"); 
   std::stringstream ss; 
   ss << "Random:seed = " << seed;
   hs->readString(ss.str());
  
-  //ggH2aa2qqgammagamma
+  //ggH2aa2gggammagamma
   if(proc == 1){
-    hs->readString("Higgs:useBSM = on");
-    hs->readString("HiggsBSM:gg2H1 = on");
-    ss.str("");
-    ss << "35:m0 = " << H_MASS;
-    hs->readString(ss.str());
-    ss.str("");
-    ss << "35:mWidth = " << H_WIDTH;
-    hs->readString(ss.str());
-    hs->readString("35:doForceWidth = on");
-    hs->readString("35:onMode = off");
-    hs->readString("35:oneChannel = 1 1 100 36 36");
-    hs->readString("35:onIfAny = 36"); //h->aa
-    hs->readString("36:onMode = off");
-    hs->readString("36:oneChannel = 1 0.5 100 22 22"); //a->gammagamma
-    hs->readString("36:addChannel = 1 0.5 100 21 21"); //a->gg
-    hs->readString("36:onIfAny = 21 22");
+    hs->readString("HiggsSM:gg2H = on");
+    hs->readString("25:onMode = off");
+    //hs->readString("25:oneChannel = 1 1 100 36 36");
+    hs->readString("25:addChannel = 1 1 100 36 36");
     ss.str("");
     ss << "36:m0 = " << scalar_mass;
     hs->readString(ss.str());
@@ -131,6 +119,9 @@ void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
     hs->readString("36:mMin = 29.5");
     hs->readString("36:mMax = 30.5");
     hs->readString("36:tau0 = 0"); //scalar lifetime
+    hs->readString("36:onMode = off");
+    hs->readString("36:addChannel = 1 0.5 100 22 22"); //a->gammagamma
+    hs->readString("36:addChannel = 1 0.5 100 21 21"); //a->gg
     hs->init(2212 /* p */, 2212 /* p */, 14000. /* TeV */); //this has to be the last line!
   }
   //ffbar2gammagamma
