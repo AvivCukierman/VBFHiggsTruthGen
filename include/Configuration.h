@@ -39,22 +39,6 @@ public:
   float  pThatmax;
   float  scalar_mass;
 
-  float  phi;
-  float  psi;
-
-  float pixelSize;
-  float minP;
-
-  bool   useCK;
-  bool   segmentation;
-  bool   storeallparticles;
-  bool   magfield;
-  bool   filterCharge;
-  bool   filterP;
-  smearMode HSmode;
-  smearMode PUmode;
-  timingMode timemode;
-  distribution dtype;  
 };
 
 #endif

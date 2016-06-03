@@ -64,12 +64,11 @@ Analysis::~Analysis(){
 }
 
 // Begin method
-void Analysis::Initialize(float minEta, float maxEta, distribution dtype, int seed){
+void Analysis::Initialize(float minEta, float maxEta, int seed){
    // Declare TTree
    tF = new TFile((fOutDir + "/" + fOutName + ".root").c_str(), "RECREATE");
    tT = new TTree("tree", "Event Tree for VBFHiggs");
    //rnd.reset(new TimingDistribution(bunchsize,seed,phi,psi));
-   _dtype=dtype;
 
    _minEta= (minEta > 0) ? minEta : 0;
    if(maxEta <= minEta){
@@ -156,16 +155,22 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
   
   // Particle loop -----------------------------------------------------------
   for (int ip=0; ip<_pythiaHS->event.size(); ++ip){
+
+    if(_pythiaHS->event[ip].id()==22 && abs(_pythiaHS->event[ip].status())==23){ //gamma in hardest process
+      cout << Ntruthphotons << endl;
+      Ntruthphotons++;
+    }
     
     if(Ignore(_pythiaHS->event[ip]))
       continue;
+
     
     fastjet::PseudoJet p(_pythiaHS->event[ip].px(), 
 			 _pythiaHS->event[ip].py(), 
 			 _pythiaHS->event[ip].pz(),
 			 _pythiaHS->event[ip].e() ); 
     
-    p.set_user_info(new ParticleInfo(_pythiaHS->event[ip].id(),
+    p.set_user_info(new ParticleInfo(_pythiaHS->event[ip].id(),_pythiaHS->event[ip].status(),
 				   ip,0,false,_pythiaHS->event[ip].pT()));  
     
     particlesForJets.push_back(p);
@@ -188,7 +193,7 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
     clm     ->push_back(particlesForJets[icl].m());*/
     auto cl = particlesForJets[icl];
     int id = cl.user_info<ParticleInfo>().pdg_id();
-    if(id==22 && cl.pt()>10){ //gamme with pt>10 GeV
+    if(id==22 && cl.pt()>10){ //gamma with pt>10 GeV
       gammapt->push_back(cl.pt());
       gammaeta->push_back(cl.eta());
       gammaphi->push_back(cl.phi());
@@ -247,7 +252,7 @@ void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceA
         auto cons0 = constituents.begin();
         if(cons0->has_user_info()){
           int pdgid = cons0->user_info<ParticleInfo>().pdg_id();
-          selectedJets[i].set_user_info(new ParticleInfo(pdgid,i,0,false,jetpt));  
+          selectedJets[i].set_user_info(new ParticleInfo(pdgid,0,i,0,false,jetpt));  
         }
         else cerr << "Particle does not have pdg id" << endl;
       }
@@ -289,9 +294,7 @@ void Analysis::DeclareBranches(){
   
   tT->Branch("EventNumber",&fTEventNumber,"EventNumber/I");
   tT->Branch("NPV",&fTNPV,"NPV/I");
-  //tT->Branch("zvtxspread",&fzvtxspread,"zvtxspread/F");
-  //tT->Branch("tvtxspread",&ftvtxspread,"tvtxspread/F"); 
-  //tT->Branch("zpu","std::vector<float>",&zpu);
+  tT->Branch("Ntruthphotons",&Ntruthphotons,"Ntruthphotons/I");
 
   tT->Branch("gammapt","std::vector<float>",&gammapt);
   tT->Branch("gammaphi","std::vector<float>",&gammaphi);
@@ -303,10 +306,6 @@ void Analysis::DeclareBranches(){
   tT->Branch("j0eta","std::vector<float>",&j0eta);
   tT->Branch("j0m","std::vector<float>",&j0m);
   tT->Branch("j0id","std::vector<float>",&j0id);
-
-  //tT->Branch("truth","std::vector<float>",&j0cltruth);
-  //tT->Branch("pu","std::vector<float>",&j0clpu);
-  //tT->Branch("charge","std::vector<float>",&j0clcharge);
   
   return;
 }
@@ -316,6 +315,7 @@ void Analysis::ResetBranches(){
       // reset branches 
       fTEventNumber                 = -999;
       fTNPV = -1;
+      Ntruthphotons = 0;
 
       gammapt->clear();
       gammaphi->clear();

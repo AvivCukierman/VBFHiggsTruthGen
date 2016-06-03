@@ -2,12 +2,6 @@
 
 Configuration::Configuration(int argc, char* argv[]){
 
-    HSmode =smearMode::ZT;
-    PUmode =smearMode::ZT;
-    useCK     =false;
-    filterCharge=true;
-    magfield = false;
-    storeallparticles = false;
     autoName=false;
     //int profile;
 

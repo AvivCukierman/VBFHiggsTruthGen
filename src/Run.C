@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
     
   // Analysis
   Analysis analysis(pythiaHS.get(),pythiaPU.get(), settings);
-  analysis.Initialize(settings.minEta,settings.maxEta,settings.dtype,2*settings.seed);
+  analysis.Initialize(settings.minEta,settings.maxEta,2*settings.seed);
   
   // Event loop
   cout << "Progress:" << endl;

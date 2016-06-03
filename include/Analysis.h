@@ -44,16 +44,11 @@ class Analysis{
   float _maxEta;
   double _R;
   double _minP;
-
-  distribution _dtype;
-  double psi;
-  double phi;
   
   // Tree Vars ---------------------------------------
   int fTEventNumber;
   int fTNPV;
-  float fzvtxspread;
-  float ftvtxspread;
+  int Ntruthphotons;
   
   branch *gammapt;
   branch *gammaphi;
@@ -65,12 +60,6 @@ class Analysis{
   branch *j0eta;
   branch *j0m;
   branch *j0id;
-
-
-  bool randomZ;
-  bool randomT;
-  bool smear;
-  bool displace;
 
   Pythia8::Pythia *_pythiaHS;
   Pythia8::Pythia *_pythiaPU;
@@ -88,7 +77,7 @@ class Analysis{
   ~Analysis ();
   
   void AnalyzeEvent(int iEvt, int NPV);
-  void Initialize(float minEta, float maxEta, distribution dtype=gaussian,int seed=123);
+  void Initialize(float minEta, float maxEta, int seed=123);
 };
 
 #endif
