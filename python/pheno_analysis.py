@@ -21,7 +21,7 @@ parser.add_option("--inputDir", help="Directory containing input files",type=str
 parser.add_option("--inputFile", help="Input file name",type=str, default="VBFHiggs.root")
 parser.add_option("--submitDir", help="Directory containing output files",type=str, default="output")
 parser.add_option("--plotDir", help="Directory containing plots",type=str, default="plots")
-parser.add_option("--numEvents", help="How many events to include (set to -1 for all events)",type=int, default=100000)
+parser.add_option("--numEvents", help="How many events to include (set to -1 for all events)",type=int, default=-1)
 parser.add_option("--identifier", help="Identify dataset",type=str, default="VBFHiggs")
 
 # Root configuration
@@ -29,11 +29,14 @@ parser.add_option("--jetpt", help="jet pT branch name",type=str, default="j0pt")
 parser.add_option("--jeteta", help="jet eta branch name",type=str, default="j0eta")
 parser.add_option("--jetphi", help="jet phi branch name",type=str, default="j0phi")
 parser.add_option("--jetm", help="jet m branch name",type=str, default="j0m")
+parser.add_option("--jetid", help="jet id branch name",type=str, default="j0id")
 
 parser.add_option("--gammapt", help="gamma pT branch name",type=str, default="gammapt")
 parser.add_option("--gammaeta", help="gamma eta branch name",type=str, default="gammaeta")
 parser.add_option("--gammaphi", help="gamma phi branch name",type=str, default="gammaphi")
 parser.add_option("--gammam", help="gamma m branch name",type=str, default="gammam")
+
+parser.add_option("--Ntruthphotons", help="Ntruthphotons branch name",type=str, default="Ntruthphotons")
 
 # object configuration
 parser.add_option("--minjetpt", help="min pt cut on jets", type=float, default=0)
@@ -49,8 +52,35 @@ if not os.path.exists(options.plotDir):
   print '== Making folder '+options.plotDir+' =='
   os.makedirs(options.plotDir)
 
+def dr(eta1,phi1,eta2,phi2):
+  v1 = r.TLorentzVector()
+  v2 = r.TLorentzVector()
+
+  #pt,m don't matter for deltaR
+  v1.SetPtEtaPhiM(1,eta1,phi1,1)
+  v2.SetPtEtaPhiM(1,eta2,phi2,1)
+
+  return v1.DeltaR(v2)
+
+def mindr(etas1,phis1,etas2,phis2,same):
+  if not len(etas1)==len(phis1): raise RuntimeError('etas and phis different lengths')
+  if not len(etas2)==len(phis2): raise RuntimeError('etas and phis different lengths')
+  if same and len(etas1)<2: raise RuntimeError('not enough etas and phis to calculate mindr')
+  cmindr = float('inf')
+  for i,(eta1,phi1) in enumerate(zip(etas1,phis1)):
+    if same:
+      for eta2,phi2 in zip(etas1[i+1:],phis1[i+1:]):
+        cdr = dr(eta1,phi1,eta2,phi2)
+        cmindr = min(cmindr,cdr)
+    else:
+      for eta2,phi2 in zip(etas2,phis2):
+        cdr = dr(eta1,phi1,eta2,phi2)
+        cmindr = min(cmindr,cdr)
+  return cmindr
+
 def readRoot():
   import glob
+  global cutflow
 
   filenames = glob.glob(options.inputDir+'/'+options.inputFile)
   if len(filenames) == 0: raise OSError('Can\'t find file '+options.inputDir+'/'+options.inputFile) 
@@ -72,6 +102,8 @@ def readRoot():
   else: print '== \''+options.jetphi+'\' branch is being read as jet phis =='
   if options.jetm not in branches: raise RuntimeError(options.jetm+' branch does not exist. This is the branch containing jet ms.')
   else: print '== \''+options.jetm+'\' branch is being read as jet ms =='
+  if options.jetid not in branches: raise RuntimeError(options.jetid+' branch does not exist. This is the branch containing jet ids.')
+  else: print '== \''+options.jetid+'\' branch is being read as jet ids =='
 
   if options.gammapt not in branches: raise RuntimeError(options.gammapt+' branch does not exist. This is the branch containing gamma pTs.')
   else: print '== \''+options.gammapt+'\' branch is being read as gamma pTs =='
@@ -81,6 +113,9 @@ def readRoot():
   else: print '== \''+options.gammaphi+'\' branch is being read as gamma phis =='
   if options.gammam not in branches: raise RuntimeError(options.gammam+' branch does not exist. This is the branch containing gamma ms.')
   else: print '== \''+options.gammam+'\' branch is being read as gamma ms =='
+
+  if options.Ntruthphotons not in branches: raise RuntimeError(options.Ntruthphotons+' branch does not exist. This is the branch containing the number of truth photons in the hardest process.')
+  else: print '== \''+options.Ntruthphotons+'\' branch is being read as number of truth photons in the hardest process =='
 
   nentries = tree.GetEntries()
 
@@ -96,16 +131,39 @@ def readRoot():
 
   for jentry in xrange(nentries):
     if jentry>options.numEvents and options.numEvents>0: continue
+    cutflow[0]+=1 #entries read in -> cross section
     tree.GetEntry(jentry)
 
     if not jentry%1000:
       stdout.write('== \r%d events read ==\n'%jentry)
       stdout.flush() 
+
+    Ntruthphotons = tree.Ntruthphotons
+    if not Ntruthphotons == 2: continue #only events with 2 truth photons
+    cutflow[1]+=1
+
+    treejpts = getattr(tree,options.jetpt)
+    treejetas = getattr(tree,options.jeteta)
+    treejphis = getattr(tree,options.jetphi)
+    treejms = getattr(tree,options.jetm)
+    treejids = getattr(tree,options.jetid)
     
-    jpts = array([j for j in getattr(tree,options.jetpt)])
-    jetas = array([j for j in getattr(tree,options.jeteta)])
-    jphis = array([j for j in getattr(tree,options.jetphi)])
-    jms = array([j for j in getattr(tree,options.jetm)])
+    jpts = []
+    jetas = []
+    jphis = []
+    jms = []
+
+    for jpt,jeta,jphi,jm,jid in zip(treejpts,treejetas,treejphis,treejms,treejids):
+      if jid==22: continue #don't count jets formed from photons
+      jpts.append(jpt)
+      jetas.append(jeta)
+      jphis.append(jphi)
+      jms.append(jm)
+
+    jpts = array(jpts)
+    jetas = array(jetas)
+    jphis = array(jphis)
+    jms = array(jms)
 
     jetas = jetas[jpts>options.minjetpt]
     jphis = jphis[jpts>options.minjetpt]
@@ -134,7 +192,8 @@ def readRoot():
 
   return jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
 
-def plot(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
+def initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
+  global cutflow
   jetmults = [len(j) for j in jetpts]
   gammamults = [len(g) for g in gammapts]
 
@@ -152,6 +211,19 @@ def plot(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
   plt.savefig(options.plotDir+'/gammamultiplicity_'+options.identifier+'.png')
   plt.close()
 
+  for jpt,jeta,jphi,jm,jmult,gpt,geta,gphi,gm,gmult in zip(jetpts,jetetas,jetphis,jetms,jetmults,gammapts,gammaetas,gammaphis,gammams,gammamults):
+    if not gmult==2: continue
+    cutflow[2]+=1
+    if jmult<2: continue
+    cutflow[3]+=1
+    if mindr(jeta,jphi,jeta,jphi,True)<0.4: continue
+    cutflow[4]+=1
+    if mindr(geta,gphi,geta,gphi,True)<0.4: continue
+    cutflow[5]+=1
+    if mindr(geta,gphi,jeta,jphi,False)<0.4: continue
+    cutflow[6]+=1
+
+def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
   jetamasses = []
   jetamasses_incl = []
   jetavecs = []
@@ -204,7 +276,7 @@ def plot(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
 
 
 
-
+cutflow = [0,0,0,0,0,0,0,0,0,0,0,0]
 jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams = readRoot()
-plot(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams)
-
+initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams)
+print cutflow
