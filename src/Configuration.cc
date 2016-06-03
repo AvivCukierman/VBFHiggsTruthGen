@@ -121,7 +121,7 @@ void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
   //ffbar2gammagamma
   else if(proc == 2){
     hs->readString("PromptPhoton:ffbar2gammagamma = on");
-    //hs->readString("TimeShower:weakShower = on");
+    hs->readString("PhaseSpace:pTHatMin = 10");
     hs->init(2212 /* p */, 2212 /* p */, 14000. /* TeV */); //this has to be the last line!
   }
   //VBFH2aa2gggammagamma
