@@ -55,5 +55,10 @@ clean:
 
 install:
 	install Run -t ${HOME}/local/bin
-	install setupPileup.sh -t ${HOME}/local/bin
-	install scripts/Pileup.sh -t ${HOME}/local/bin
+	install setup.sh -t ${HOME}/local/bin
+	install scripts/setup_batch.sh -t ${HOME}/local/bin
+
+cleanbin:
+	rm -rf ${HOME}/local/bin/Run
+	rm -rf ${HOME}/local/bin/setup.sh
+	rm -rf ${HOME}/local/bin/setup_batch.sh

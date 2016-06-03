@@ -64,7 +64,7 @@ Analysis::~Analysis(){
 }
 
 // Begin method
-void Analysis::Initialize(float minEta, float maxEta, int seed){
+void Analysis::Initialize(float minEta, float maxEta){
    // Declare TTree
    tF = new TFile((fOutDir + "/" + fOutName + ".root").c_str(), "RECREATE");
    tT = new TTree("tree", "Event Tree for VBFHiggs");
@@ -157,7 +157,6 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
   for (int ip=0; ip<_pythiaHS->event.size(); ++ip){
 
     if(_pythiaHS->event[ip].id()==22 && abs(_pythiaHS->event[ip].status())==23){ //gamma in hardest process
-      cout << Ntruthphotons << endl;
       Ntruthphotons++;
     }
     

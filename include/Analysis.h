@@ -77,7 +77,7 @@ class Analysis{
   ~Analysis ();
   
   void AnalyzeEvent(int iEvt, int NPV);
-  void Initialize(float minEta, float maxEta, int seed=123);
+  void Initialize(float minEta, float maxEta);
 };
 
 #endif
