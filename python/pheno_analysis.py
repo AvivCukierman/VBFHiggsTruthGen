@@ -44,6 +44,8 @@ parser.add_option("--mingammapt", help="min pt cut on photons", type=float, defa
 
 (options, args) = parser.parse_args()
 
+HIGGS_MASS = 125
+
 if not os.path.exists(options.inputDir): raise OSError(options.inputDir +' does not exist. This is where the input Root files go.')
 if not os.path.exists(options.submitDir):
   print '== Making folder '+options.submitDir+' =='
@@ -62,6 +64,16 @@ def dr(eta1,phi1,eta2,phi2):
 
   return v1.DeltaR(v2)
 
+def dphi(phi1,phi2):
+  v1 = r.TLorentzVector()
+  v2 = r.TLorentzVector()
+
+  #pt,m,eta don't matter for deltaR
+  v1.SetPtEtaPhiM(1,0,phi1,1)
+  v2.SetPtEtaPhiM(1,0,phi2,1)
+
+  return v1.DeltaR(v2)
+
 def mindr(etas1,phis1,etas2,phis2,same):
   if not len(etas1)==len(phis1): raise RuntimeError('etas and phis different lengths')
   if not len(etas2)==len(phis2): raise RuntimeError('etas and phis different lengths')
@@ -77,6 +89,16 @@ def mindr(etas1,phis1,etas2,phis2,same):
         cdr = dr(eta1,phi1,eta2,phi2)
         cmindr = min(cmindr,cdr)
   return cmindr
+
+def combine_vecs(pts,etas,phis,ms):
+    v1 = r.TLorentzVector()
+    v2 = r.TLorentzVector()
+
+    v1.SetPtEtaPhiM(pts[0],etas[0],phis[0],ms[0])
+    v2.SetPtEtaPhiM(pts[1],etas[1],phis[1],ms[1])
+
+    va = v1 + v2
+    return va
 
 def readRoot():
   import glob
@@ -211,72 +233,147 @@ def initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gamma
   plt.savefig(options.plotDir+'/gammamultiplicity_'+options.identifier+'.png')
   plt.close()
 
-  for jpt,jeta,jphi,jm,jmult,gpt,geta,gphi,gm,gmult in zip(jetpts,jetetas,jetphis,jetms,jetmults,gammapts,gammaetas,gammaphis,gammams,gammamults):
-    if not gmult==2: continue
+  jjmindrs = []
+  ggmindrs = []
+  gjmindrs = []
+  good_indices = []
+
+  newjetpts = []
+  newjetetas = []
+  newjetphis = []
+  newjetms = []
+
+  newgammapts = []
+  newgammaetas = []
+  newgammaphis = []
+  newgammams = []
+
+  for i,(jpt,jeta,jphi,jm,jmult,gpt,geta,gphi,gm,gmult) in enumerate(zip(jetpts,jetetas,jetphis,jetms,jetmults,gammapts,gammaetas,gammaphis,gammams,gammamults)):
+    if not gmult==2:
+      continue
     cutflow[2]+=1
-    if jmult<2: continue
+    if jmult<2:
+      continue
     cutflow[3]+=1
-    if mindr(jeta,jphi,jeta,jphi,True)<0.4: continue
-    cutflow[4]+=1
-    if mindr(geta,gphi,geta,gphi,True)<0.4: continue
-    cutflow[5]+=1
-    if mindr(geta,gphi,jeta,jphi,False)<0.4: continue
-    cutflow[6]+=1
+    jjmindr = mindr(jeta,jphi,jeta,jphi,True)
+    jjmindrs.append(jjmindr)
+    ggmindr = mindr(geta,gphi,geta,gphi,True)
+    ggmindrs.append(ggmindr)
+    gjmindr = mindr(geta,gphi,jeta,jphi,False)
+    gjmindrs.append(gjmindr)
+    if jjmindr>0.4 and ggmindr>0.4 and gjmindr>0.4:
+      newjetpts.append(array([jpt[0],jpt[1]]))
+      newjetetas.append(array([jeta[0],jeta[1]]))
+      newjetphis.append(array([jphi[0],jphi[1]]))
+      newjetms.append(array([jm[0],jm[1]]))
+
+      newgammapts.append(array([gpt[0],gpt[1]]))
+      newgammaetas.append(array([geta[0],geta[1]]))
+      newgammaphis.append(array([gphi[0],gphi[1]]))
+      newgammams.append(array([gm[0],gm[1]]))
+  cutflow[4] = len(newjetpts)
+
+  n,bins,patches = plt.hist(jjmindrs,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.xlim(0,3.0)
+  plt.xlabel('Minimum jet-jet $\Delta R$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/jjmindr_'+options.identifier+'.png')
+  plt.close()
+
+  n,bins,patches = plt.hist(ggmindrs,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.xlim(0,3.0)
+  plt.xlabel('Minimum $\gamma-\gamma$ $\Delta R$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/ggmindr_'+options.identifier+'.png')
+  plt.close()
+
+  n,bins,patches = plt.hist(gjmindrs,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.xlim(0,3.0)
+  plt.xlabel('Minimum jet-$\gamma$ $\Delta R$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/gjmindr_'+options.identifier+'.png')
+  plt.close()
+
+  return array(newjetpts),array(newjetetas),array(newjetphis),array(newjetms),array(newgammapts),array(newgammaetas),array(newgammaphis),array(newgammams)
 
 def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
+  jetdphis = []
   jetamasses = []
-  jetamasses_incl = []
   jetavecs = []
-  for ept,eeta,ephi,em,emult in zip(jetpts,jetetas,jetphis,jetms,jetmults):
-    if(emult<2):
-      jetamasses_incl.append(-1)
-    else:
-      v1 = r.TLorentzVector()
-      v2 = r.TLorentzVector()
-
-      v1.SetPtEtaPhiM(ept[0],eeta[0],ephi[0],em[0])
-      v2.SetPtEtaPhiM(ept[1],eeta[1],ephi[1],em[1])
-
-      va = v1 + v2
-      jetavecs.append(va)
-      jetamasses.append(va.M())
-      jetamasses_incl.append(va.M())
+  for ept,eeta,ephi,em in zip(jetpts,jetetas,jetphis,jetms):
+    jetdphis.append(dphi(ephi[0],ephi[1]))
+    va = combine_vecs(ept,eeta,ephi,em)
+    jetavecs.append(va)
+    jetamasses.append(va.M())
 
   n,bins,patches = plt.hist(jetamasses,normed=True,bins=20,facecolor='b',histtype='stepfilled')
-  #note: last bin is max+max-1
-  plt.xlabel(r'$a\rightarrow jj$ mass')
+  plt.ylim(0,max(n)*1.1)
+  plt.xlabel(r'$M_{jj}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/ajjmass_'+options.identifier+'.png')
+  plt.savefig(options.plotDir+'/mjj_'+options.identifier+'.png')
   plt.close()
 
+  n,bins,patches = plt.hist(jetdphis,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.xlim(0,3.14)
+  plt.xlabel(r'$\Delta\phi_{jj}$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/dphijj_'+options.identifier+'.png')
+  plt.close()
+
+  gammadphis = []
   gammaamasses = []
-  gammaamasses_incl = []
   gammaavecs = []
-  for ept,eeta,ephi,em,emult in zip(gammapts,gammaetas,gammaphis,gammams,gammamults):
-    if(emult<2):
-      gammaamasses_incl.append(-1)
-    else:
-      v1 = r.TLorentzVector()
-      v2 = r.TLorentzVector()
-
-      v1.SetPtEtaPhiM(ept[0],eeta[0],ephi[0],em[0])
-      v2.SetPtEtaPhiM(ept[1],eeta[1],ephi[1],em[1])
-
-      va = v1 + v2
-      gammaavecs.append(va)
-      gammaamasses.append(va.M())
-      gammaamasses_incl.append(va.M())
+  for ept,eeta,ephi,em in zip(gammapts,gammaetas,gammaphis,gammams):
+    gammadphis.append(dphi(ephi[0],ephi[1]))
+    va = combine_vecs(ept,eeta,ephi,em)
+    gammaavecs.append(va)
+    gammaamasses.append(va.M())
 
   n,bins,patches = plt.hist(gammaamasses,normed=True,bins=20,facecolor='b',histtype='stepfilled')
-  #note: last bin is max+max-1
-  plt.xlabel(r'$a\rightarrow \gamma\gamma$ mass')
+  plt.ylim(0,max(n)*1.1)
+  plt.xlabel(r'$M_{\gamma\gamma}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/agamgammass_'+options.identifier+'.png')
+  plt.savefig(options.plotDir+'/mgamgam_'+options.identifier+'.png')
   plt.close()
 
+  n,bins,patches = plt.hist(gammadphis,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.xlim(0,3.14)
+  plt.xlabel(r'$\Delta\phi_{\gamma\gamma}$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/dphigamgam_'+options.identifier+'.png')
+  plt.close()
+
+  jetdphis = array(jetdphis)
+  gammadphis = array(gammadphis)
+  jetamasses = array(jetamasses)
+  gammaamasses = array(gammaamasses)
+
+  n,bins,patches = plt.hist(abs(jetamasses-gammaamasses),normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.ylim(0,max(n)*1.1)
+  plt.xlabel(r'$|M_{jj}-M_{\gamma\gamma}|$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/amassdiff_'+options.identifier+'.png')
+  plt.close()
+
+  good_indices = all([jetdphis<1.0,gammadphis<1.3,abs(jetamasses-gammaamasses)<15],axis=0)
+  cutflow[5] = sum(good_indices)
+
+  hmasses = array([(va1+va2).M() for va1,va2 in zip(gammaavecs,jetavecs)])
+  n,bins,patches = plt.hist(hmasses,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  plt.ylim(0,max(n)*1.1)
+  plt.xlabel(r'$M_{jj\gamma\gamma}$')
+  plt.ylabel('a.u.')
+  plt.savefig(options.plotDir+'/mh_'+options.identifier+'.png')
+  plt.close()
+
+  good_indices = all([jetdphis<1.0,gammadphis<1.3,abs(jetamasses-gammaamasses)<15,abs(hmasses-HIGGS_MASS)<25],axis=0)
+  cutflow[6] = sum(good_indices)
+
+  return
 
 
-cutflow = [0,0,0,0,0,0,0,0,0,0,0,0]
+cutflow = [0,0,0,0,0,0,0]
 jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams = readRoot()
-initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams)
+ijetpts,ijetetas,ijetphis,ijetms,igammapts,igammaetas,igammaphis,igammams = initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams)
+final_cuts(ijetpts,ijetetas,ijetphis,ijetms,igammapts,igammaetas,igammaphis,igammams)
 print cutflow
