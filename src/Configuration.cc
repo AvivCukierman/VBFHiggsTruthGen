@@ -94,7 +94,7 @@ void Configuration::print(){
 
 void Configuration::ConfigurePythiaSignal(Pythia8::Pythia* hs){
 
-  hs->readString("Print:quiet=off");
+  hs->readString("Print:quiet=on");
   hs->readString("Random:setSeed = on"); 
   std::stringstream ss; 
   ss << "Random:seed = " << seed;
