@@ -306,15 +306,17 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
     jetavecs.append(va)
     jetamasses.append(va.M())
 
-  n,bins,patches = plt.hist(jetamasses,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  binwidth = 5
+  n,bins,patches = plt.hist(jetamasses,normed=True,bins=numpy.arange(min(jetamasses), max(jetamasses) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
+  plt.xlim(0,60)
   plt.xlabel(r'$M_{jj}$')
   plt.ylabel('a.u.')
   plt.savefig(options.plotDir+'/mjj_'+options.identifier+'.png')
   plt.close()
 
   n,bins,patches = plt.hist(jetdphis,normed=True,bins=20,facecolor='b',histtype='stepfilled')
-  plt.xlim(0,3.14)
+  plt.xlim(0,3.5)
   plt.xlabel(r'$\Delta\phi_{jj}$')
   plt.ylabel('a.u.')
   plt.savefig(options.plotDir+'/dphijj_'+options.identifier+'.png')
@@ -329,15 +331,17 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
     gammaavecs.append(va)
     gammaamasses.append(va.M())
 
-  n,bins,patches = plt.hist(gammaamasses,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  binwidth = 5
+  n,bins,patches = plt.hist(gammaamasses,normed=True,bins=numpy.arange(min(gammaamasses), max(gammaamasses) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
+  plt.xlim(0,60)
   plt.xlabel(r'$M_{\gamma\gamma}$')
   plt.ylabel('a.u.')
   plt.savefig(options.plotDir+'/mgamgam_'+options.identifier+'.png')
   plt.close()
 
   n,bins,patches = plt.hist(gammadphis,normed=True,bins=20,facecolor='b',histtype='stepfilled')
-  plt.xlim(0,3.14)
+  plt.xlim(0,3.5)
   plt.xlabel(r'$\Delta\phi_{\gamma\gamma}$')
   plt.ylabel('a.u.')
   plt.savefig(options.plotDir+'/dphigamgam_'+options.identifier+'.png')
@@ -348,8 +352,11 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
   jetamasses = array(jetamasses)
   gammaamasses = array(gammaamasses)
 
-  n,bins,patches = plt.hist(abs(jetamasses-gammaamasses),normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  data = abs(jetamasses-gammaamasses)
+  binwidth = 5
+  n,bins,patches = plt.hist(data,normed=True,bins=numpy.arange(min(data), max(data) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
+  plt.xlim(0,50)
   plt.xlabel(r'$|M_{jj}-M_{\gamma\gamma}|$')
   plt.ylabel('a.u.')
   plt.savefig(options.plotDir+'/amassdiff_'+options.identifier+'.png')
@@ -359,8 +366,10 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
   cutflow[5] = sum(good_indices)
 
   hmasses = array([(va1+va2).M() for va1,va2 in zip(gammaavecs,jetavecs)])
-  n,bins,patches = plt.hist(hmasses,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  binwidth = 5
+  n,bins,patches = plt.hist(hmasses,normed=True,bins=numpy.arange(min(hmasses), max(hmasses) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
+  plt.xlim(0,200)
   plt.xlabel(r'$M_{jj\gamma\gamma}$')
   plt.ylabel('a.u.')
   plt.savefig(options.plotDir+'/mh_'+options.identifier+'.png')
