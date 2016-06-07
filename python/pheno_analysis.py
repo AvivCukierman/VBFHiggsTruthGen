@@ -18,7 +18,7 @@ parser = OptionParser()
 
 # job configuration
 parser.add_option("--inputDir", help="Directory containing input files",type=str, default="data")
-parser.add_option("--inputFile", help="Input file name",type=str, default="VBFHiggs.root")
+parser.add_option("--inputFile", help="Input file name",type=str, default="")
 parser.add_option("--submitDir", help="Directory containing output files",type=str, default="output")
 parser.add_option("--plotDir", help="Directory containing plots",type=str, default="plots")
 parser.add_option("--numEvents", help="How many events to include (set to -1 for all events)",type=int, default=-1)
@@ -41,8 +41,8 @@ parser.add_option("--Ntruthphotons", help="Ntruthphotons branch name",type=str, 
 # object configuration
 parser.add_option("--minjetpt", help="min pt cut on jets", type=float, default=0)
 parser.add_option("--mingammapt", help="min pt cut on photons", type=float, default=0)
-parser.add_option("--maxjeteta", help="max eta cut on jets", type=float, default=0)
-parser.add_option("--maxgammaeta", help="max eta cut on photons", type=float, default=0)
+parser.add_option("--maxjeteta", help="max eta cut on jets", type=float, default=2.5)
+parser.add_option("--maxgammaeta", help="max eta cut on photons", type=float, default=2.5)
 
 (options, args) = parser.parse_args()
 
@@ -106,13 +106,17 @@ def readRoot():
   import glob
   global cutflow
 
-  filenames = glob.glob(options.inputDir+'/'+options.inputFile)
-  if len(filenames) == 0: raise OSError('Can\'t find file '+options.inputDir+'/'+options.inputFile) 
-  filename = filenames[0]
-  print '== Reading in '+filename+' =='
-
+  if len(options.inputFile)>0:
+    filenames = glob.glob(options.inputDir+'/'+options.inputFile)
+    if len(filenames) == 0: raise OSError('Can\'t find file '+options.inputDir+'/'+options.inputFile) 
+  else:
+    filenames = glob.glob(options.inputDir+'/*.root')
+    if len(filenames) == 0: raise OSError('Can\'t find files in '+options.inputDir) 
   tree = r.TChain('tree')
-  tree.Add(filename) 
+  for filename in filenames:
+    print '== Reading in '+filename+' =='
+
+    tree.Add(filename) 
 
   # make sure the branches are compatible between the two
   branches = set(i.GetName() for i in tree.GetListOfBranches())
