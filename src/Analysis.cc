@@ -179,8 +179,9 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
 
   //JetVector selectedJets,selectedTruthJets;
   JetVector selectedJets;
+  vector<int> jetIDs;
   fastjet::ClusterSequenceArea clustSeq(particlesForJets, *jetDef, *active_area);
-  selectJets(particlesForJets,clustSeq,selectedJets);
+  selectJets(particlesForJets,clustSeq,selectedJets,jetIDs);
 
   //fastjet::ClusterSequenceArea clustSeqTruth(particlesForJets_np, *jetDef, *active_area);
   //selectedTruthJets = sorted_by_pt(clustSeqTruth.inclusive_jets(10.));
@@ -209,12 +210,16 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
     cout << a.M() << endl;
   }*/
 
-  for(auto jet=selectedJets.begin(); jet!=selectedJets.end(); ++jet){
-    j0pt  ->push_back(jet->pt());
-    j0eta ->push_back(jet->eta());
-    j0phi ->push_back(jet->phi());
-    j0m   ->push_back(jet->m());
-    j0id  ->push_back(jet->user_info<ParticleInfo>().pdg_id());
+  if(selectedJets.size() != jetIDs.size()) cerr << "IDs do not match jets." << endl;
+  for(unsigned int ijet=0; ijet<selectedJets.size(); ++ijet){
+    auto jet = selectedJets[ijet];
+    //if(jet->pt() < 10) continue;
+    j0pt  ->push_back(jet.pt());
+    j0eta ->push_back(jet.eta());
+    j0phi ->push_back(jet.phi());
+    j0m   ->push_back(jet.m());
+    //j0id  ->push_back(jet.user_info<ParticleInfo>().pdg_id());
+    j0id  ->push_back(jetIDs[ijet]);
   }
 
   //FillTruthTree(selectedTruthJets);
@@ -227,7 +232,7 @@ void Analysis::AnalyzeEvent(int ievt, int NPV){
   return;
 }
 
-void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceArea &clustSeq, JetVector &selectedJets){
+void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceArea &clustSeq, JetVector &selectedJets, vector<int> &jetIDs){
   try{
     bge->set_particles(particlesForJets);
 
@@ -242,6 +247,7 @@ void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceA
     
     //select jets with pt > 10
     selectedJets.clear();
+    jetIDs.clear();
     int i=0;
     for( auto ijet = allSelectedJets.begin(); ijet != allSelectedJets.end(); ++ijet){
       float jetpt = ijet->pt();
@@ -251,9 +257,10 @@ void Analysis::selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceA
         auto cons0 = constituents.begin();
         if(cons0->has_user_info()){
           int pdgid = cons0->user_info<ParticleInfo>().pdg_id();
-          selectedJets[i].set_user_info(new ParticleInfo(pdgid,0,i,0,false,jetpt));  
+          jetIDs.push_back(pdgid);
+          //ijet->set_user_info(new ParticleInfo(pdgid,0,i,0,false,jetpt));  
         }
-        else cerr << "Particle does not have pdg id" << endl;
+        else cout << "Particle does not have pdg id" << endl;
       }
       i++;
     }

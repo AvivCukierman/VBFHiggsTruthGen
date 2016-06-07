@@ -70,7 +70,7 @@ class Analysis{
   bool Ignore(Pythia8::Particle &p);
 
   //Jet selection functions
-  void selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceArea &clustSeq, JetVector &selectedJets);
+  void selectJets(JetVector &particlesForJets, fastjet::ClusterSequenceArea &clustSeq, JetVector &selectedJets, vector<int> &jetIDs);
   
  public:
   Analysis (Pythia8::Pythia *pythiaHS, Pythia8::Pythia *pythiaPU, Configuration q);
