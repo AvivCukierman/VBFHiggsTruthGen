@@ -41,6 +41,8 @@ parser.add_option("--Ntruthphotons", help="Ntruthphotons branch name",type=str, 
 # object configuration
 parser.add_option("--minjetpt", help="min pt cut on jets", type=float, default=0)
 parser.add_option("--mingammapt", help="min pt cut on photons", type=float, default=0)
+parser.add_option("--maxjeteta", help="max eta cut on jets", type=float, default=0)
+parser.add_option("--maxgammaeta", help="max eta cut on photons", type=float, default=0)
 
 (options, args) = parser.parse_args()
 
@@ -187,20 +189,22 @@ def readRoot():
     jphis = array(jphis)
     jms = array(jms)
 
-    jetas = jetas[jpts>options.minjetpt]
-    jphis = jphis[jpts>options.minjetpt]
-    jms = jms[jpts>options.minjetpt]
-    jpts = jpts[jpts>options.minjetpt]
+    good_indices = all([jpts>options.minjetpt,abs(jetas)<options.maxjeteta],axis=0)
+    jetas = jetas[good_indices]
+    jphis = jphis[good_indices]
+    jms = jms[good_indices]
+    jpts = jpts[good_indices]
 
     gpts = array([g for g in getattr(tree,options.gammapt)])
     getas = array([g for g in getattr(tree,options.gammaeta)])
     gphis = array([g for g in getattr(tree,options.gammaphi)])
     gms = array([g for g in getattr(tree,options.gammam)])
 
-    getas = getas[gpts>options.mingammapt]
-    gphis = gphis[gpts>options.mingammapt]
-    gms = gms[gpts>options.mingammapt]
-    gpts = gpts[gpts>options.mingammapt]
+    good_indices = all([gpts>options.mingammapt,abs(getas)<options.maxgammaeta],axis=0)
+    getas = getas[good_indices]
+    gphis = gphis[good_indices]
+    gms = gms[good_indices]
+    gpts = gpts[good_indices]
 
     jetpts.append(jpts)
     jetetas.append(jetas)
@@ -374,6 +378,8 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
 
 cutflow = [0,0,0,0,0,0,0]
 jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams = readRoot()
+print cutflow
 ijetpts,ijetetas,ijetphis,ijetms,igammapts,igammaetas,igammaphis,igammams = initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams)
+print cutflow
 final_cuts(ijetpts,ijetetas,ijetphis,ijetms,igammapts,igammaetas,igammaphis,igammams)
 print cutflow
