@@ -33,8 +33,8 @@ chmod u+x $SubFileLoc
 #----------------
 # OPTIONS
 
-Process=2
-ms="30"
+Process=1
+ms="10 15 20 25 30 35 40 45 50 55 60"
 mineta=0.
 maxeta=5.0
 Queue=short
@@ -61,7 +61,7 @@ for m in $ms ; do
 	    $SubFileLoc ${WorkDir} ${OutDir} ${OutDirFinal} \
 	    setup_batch.sh  \
             --OutDir ${OutDir} \
-	    --OutFile Sample_mu-${mu}_${nevents}_job-${ii} \
+	    --OutFile Sample_m-${m}_${nevents}_job-${ii} \
 	    --Proc ${Process} \
 	    --nevents ${nevents} \
             --ScalarMass ${m} \
