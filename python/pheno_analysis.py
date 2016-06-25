@@ -1,4 +1,5 @@
 from numpy import array,mean,std,all,sqrt,asarray,average,save,histogram
+from pickle import dump
 import os
 import numpy
 from optparse import OptionParser
@@ -114,6 +115,8 @@ def readRoot():
     if len(filenames) == 0: raise OSError('Can\'t find files in '+options.inputDir) 
   tree = r.TChain('tree')
   for filename in filenames:
+    statinfo = os.stat(filename)
+    if statinfo.st_size < 10000: continue #sometimes batch jobs fail
     print '== Reading in '+filename+' =='
 
     tree.Add(filename) 
@@ -166,7 +169,7 @@ def readRoot():
       stdout.write('== \r%d events read ==\n'%jentry)
       stdout.flush() 
 
-    Ntruthphotons = tree.Ntruthphotons
+    Ntruthphotons = getattr(tree,options.Ntruthphotons)
     if not Ntruthphotons == 2: continue #only events with 2 truth photons
     cutflow[1]+=1
 
@@ -223,23 +226,27 @@ def readRoot():
   return jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
 
 def initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
-  global cutflow
+  global cutflow,hists
   jetmults = [len(j) for j in jetpts]
   gammamults = [len(g) for g in gammapts]
 
-  n,bins,patches = plt.hist(jetmults,normed=True,bins=max(jetmults),facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(jetmults,normed=True,bins=range(0,max(jetmults)+1,1),facecolor='b',histtype='stepfilled')
   #note: last bin is max+max-1
   plt.xlabel('Jet Multiplicity')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/jetmultiplicity_'+options.identifier+'.png')
+  plotname = 'jetmultiplicity'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
-  n,bins,patches = plt.hist(gammamults,normed=True,bins=max(gammamults),facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(gammamults,normed=True,bins=range(0,max(gammamults)+1,1),facecolor='b',histtype='stepfilled')
   #note: last bin is max+max-1
   plt.xlabel('Photon Multiplicity')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/gammamultiplicity_'+options.identifier+'.png')
+  plotname = 'gammamultiplicity'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
   jjmindrs = []
   ggmindrs = []
@@ -280,31 +287,60 @@ def initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gamma
       newgammaphis.append(array([gphi[0],gphi[1]]))
       newgammams.append(array([gm[0],gm[1]]))
   cutflow[4] = len(newjetpts)
+  
+  gam1pts = [newgammapt[0] for newgammapt in newgammapts]
+  n,bins,patches = plt.hist(gam1pts,normed=True,bins=range(0,105,5),facecolor='b',histtype='stepfilled')
+  plt.xlim(0,100)
+  plt.ylim(0,max(n)*1.1)
+  plt.xlabel('Leading $\gamma$ $p_T$ (GeV)')
+  plt.ylabel('a.u.')
+  plotname = 'gam1pt'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
+  plt.close()
+  hists[plotname] = (n,bins)
 
-  n,bins,patches = plt.hist(jjmindrs,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  gam2pts = [newgammapt[1] for newgammapt in newgammapts]
+  n,bins,patches = plt.hist(gam2pts,normed=True,bins=range(0,105,5),facecolor='b',histtype='stepfilled')
+  plt.ylim(0,max(n)*1.1)
+  plt.xlim(0,100)
+  plt.xlabel('Subleading $\gamma$ $p_T$ (GeV)')
+  plt.ylabel('a.u.')
+  plotname = 'gam2pt'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
+  plt.close()
+  hists[plotname] = (n,bins)
+
+  n,bins,patches = plt.hist(jjmindrs,normed=True,bins=numpy.arange(0,3.15,.15),facecolor='b',histtype='stepfilled')
   plt.xlim(0,3.0)
   plt.xlabel('Minimum jet-jet $\Delta R$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/jjmindr_'+options.identifier+'.png')
+  plotname = 'jjmindr'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
-  n,bins,patches = plt.hist(ggmindrs,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(ggmindrs,normed=True,bins=numpy.arange(0,3.15,.15),facecolor='b',histtype='stepfilled')
   plt.xlim(0,3.0)
   plt.xlabel('Minimum $\gamma-\gamma$ $\Delta R$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/ggmindr_'+options.identifier+'.png')
+  plotname = 'ggmindr'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
-  n,bins,patches = plt.hist(gjmindrs,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(gjmindrs,normed=True,bins=numpy.arange(0,3.15,.15),facecolor='b',histtype='stepfilled')
   plt.xlim(0,3.0)
   plt.xlabel('Minimum jet-$\gamma$ $\Delta R$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/gjmindr_'+options.identifier+'.png')
+  plotname = 'gjmindr'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
   return array(newjetpts),array(newjetetas),array(newjetphis),array(newjetms),array(newgammapts),array(newgammaetas),array(newgammaphis),array(newgammams)
 
 def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams):
+  global cutflow,hists
   jetdphis = []
   jetamasses = []
   jetavecs = []
@@ -315,20 +351,24 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
     jetamasses.append(va.M())
 
   binwidth = 5
-  n,bins,patches = plt.hist(jetamasses,normed=True,bins=numpy.arange(min(jetamasses), max(jetamasses) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(jetamasses,normed=True,bins=numpy.arange(0, 60 + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
   plt.xlim(0,60)
   plt.xlabel(r'$M_{jj}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/mjj_'+options.identifier+'.png')
+  plotname = 'mjj'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
-  n,bins,patches = plt.hist(jetdphis,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(jetdphis,normed=True,bins=numpy.arange(0,4.2,0.2),facecolor='b',histtype='stepfilled')
   plt.xlim(0,3.5)
   plt.xlabel(r'$\Delta\phi_{jj}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/dphijj_'+options.identifier+'.png')
+  plotname = 'dphijj'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
   gammadphis = []
   gammaamasses = []
@@ -340,20 +380,24 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
     gammaamasses.append(va.M())
 
   binwidth = 5
-  n,bins,patches = plt.hist(gammaamasses,normed=True,bins=numpy.arange(min(gammaamasses), max(gammaamasses) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(gammaamasses,normed=True,bins=numpy.arange(0, 60 + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
   plt.xlim(0,60)
   plt.xlabel(r'$M_{\gamma\gamma}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/mgamgam_'+options.identifier+'.png')
+  plotname = 'mgamgam'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
-  n,bins,patches = plt.hist(gammadphis,normed=True,bins=20,facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(gammadphis,normed=True,bins=numpy.arange(0,4.2,0.2),facecolor='b',histtype='stepfilled')
   plt.xlim(0,3.5)
   plt.xlabel(r'$\Delta\phi_{\gamma\gamma}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/dphigamgam_'+options.identifier+'.png')
+  plotname = 'dphigamgam'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
   jetdphis = array(jetdphis)
   gammadphis = array(gammadphis)
@@ -362,37 +406,42 @@ def final_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams
 
   data = abs(jetamasses-gammaamasses)
   binwidth = 5
-  n,bins,patches = plt.hist(data,normed=True,bins=numpy.arange(min(data), max(data) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(data,normed=True,bins=numpy.arange(0, 50 + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
   plt.xlim(0,50)
   plt.xlabel(r'$|M_{jj}-M_{\gamma\gamma}|$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/amassdiff_'+options.identifier+'.png')
+  plotname = 'amassdiff'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
   good_indices = all([jetdphis<1.0,gammadphis<1.3,abs(jetamasses-gammaamasses)<15],axis=0)
   cutflow[5] = sum(good_indices)
 
   hmasses = array([(va1+va2).M() for va1,va2 in zip(gammaavecs,jetavecs)])
   binwidth = 5
-  n,bins,patches = plt.hist(hmasses,normed=True,bins=numpy.arange(min(hmasses), max(hmasses) + binwidth, binwidth),facecolor='b',histtype='stepfilled')
+  n,bins,patches = plt.hist(hmasses,normed=True,bins=numpy.arange(0, 200 + binwidth, binwidth),facecolor='b',histtype='stepfilled')
   plt.ylim(0,max(n)*1.1)
   plt.xlim(0,200)
   plt.xlabel(r'$M_{jj\gamma\gamma}$')
   plt.ylabel('a.u.')
-  plt.savefig(options.plotDir+'/mh_'+options.identifier+'.png')
+  plotname = 'mh'
+  plt.savefig(options.plotDir+'/'+plotname+'_'+options.identifier+'.png')
   plt.close()
+  hists[plotname] = (n,bins)
 
   good_indices = all([jetdphis<1.0,gammadphis<1.3,abs(jetamasses-gammaamasses)<15,abs(hmasses-HIGGS_MASS)<25],axis=0)
   cutflow[6] = sum(good_indices)
 
   return
 
-
+hists = {}
 cutflow = [0,0,0,0,0,0,0]
 jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams = readRoot()
-print cutflow
 ijetpts,ijetetas,ijetphis,ijetms,igammapts,igammaetas,igammaphis,igammams = initial_cuts(jetpts,jetetas,jetphis,jetms,gammapts,gammaetas,gammaphis,gammams)
-print cutflow
 final_cuts(ijetpts,ijetetas,ijetphis,ijetms,igammapts,igammaetas,igammaphis,igammams)
-print cutflow
+with open(options.submitDir+'/cutflow_'+options.identifier+'.p','wb') as outfile:
+  dump(cutflow,outfile)
+with open(options.submitDir+'/hists_'+options.identifier+'.p','wb') as outfile:
+  dump(hists,outfile)
