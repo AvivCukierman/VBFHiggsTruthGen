@@ -1,0 +1,67 @@
+{
+  "gammamultiplicity":{
+    "xlabel":"Photon Multiplicity",
+    "cut":2,
+    "greater":1
+  },
+  "dphigamgam":{
+    "xlabel":"$\\Delta\\Phi_{\\gamma\\gamma}$",
+    "cut":1.3,
+    "greater":0
+  },
+  "gam2pt":{
+    "xlabel":"Subleading $\\gamma$ $p_T$",
+    "cut":20,
+    "greater":1
+  },
+  "mh":{
+    "xlabel":"$M_{jj\\gamma\\gamma}$",
+    "cut":20,
+    "greater":1
+  },
+  "mjj":{
+    "xlabel":"$M_{jj}$",
+    "cut":0,
+    "greater":-1
+  },
+  "gam1pt":{
+    "xlabel":"Leading $\\gamma$ $p_T$",
+    "cut":20,
+    "greater":1
+  },
+  "gjmindr":{
+    "xlabel":"Minimum $\\Delta R_{j\\gamma}$",
+    "cut":0.4,
+    "greater":1
+  },
+  "amassdiff":{
+    "xlabel":"$|M_{jj}-M_{\\gamma\\gamma}|$",
+    "cut":15,
+    "greater":0
+  },
+  "ggmindr":{
+    "xlabel":"Minimum $\\Delta R_{\\gamma\\gamma}$",
+    "cut":0.4,
+    "greater":1
+  },
+  "mgamgam":{
+    "xlabel":"$M_{\\gamma\\gamma}$",
+    "cut":0,
+    "greater":-1
+  },
+  "jjmindr":{
+    "xlabel":"Minimum $\\Delta R_{jj}$",
+    "cut":0.4,
+    "greater":1
+  },
+  "dphijj":{
+    "xlabel":"$\\Delta\\Phi_{jj}$",
+    "cut":1.0,
+    "greater":0
+  },
+  "jetmultiplicity":{
+    "xlabel":"Jet Multiplicity",
+    "cut":2,
+    "greater":1
+  }
+}
