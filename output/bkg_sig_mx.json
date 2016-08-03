@@ -1,0 +1,42 @@
+[
+  {
+    "identifier":["VBF_a","_ggyy"],
+    "name":"VBF Signal ($m_a=30$ GeV)",
+    "color":"b",
+    "ls":"--",
+    "xsec":4968.0,
+    "filter":1.0,
+    "BR":0.06,
+    "sig":1
+  },
+  {
+    "identifier":["ggH_a","_ggyy"],
+    "name":"$ggH$ Signal ($m_a=30$ GeV)",
+    "color":"b",
+    "ls":"-.",
+    "xsec":16370.0,
+    "filter":1.0,
+    "BR":0.06,
+    "sig":1
+  },
+  {
+    "identifier":"myy_0_55",
+    "name":"$\\gamma\\gamma$+jets ($0<m_{\\gamma\\gamma}<55$)",
+    "color":"r",
+    "ls":"--",
+    "xsec":140900,
+    "filter":0.2432,
+    "BR":1.0,
+    "sig":0
+  },
+  {
+    "identifier":"myy_55_100",
+    "name":"$\\gamma\\gamma$+jets ($55<m_{\\gamma\\gamma}<110$)",
+    "color":"r",
+    "ls":"-.",
+    "xsec":147860,
+    "filter":0.45653,
+    "BR":1.0,
+    "sig":0
+  }
+]

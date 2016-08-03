@@ -1,0 +1,18 @@
+[
+  {
+    "identifier":"ggH_a30_ggyy",
+    "name":"Signal ($m_a=30$ GeV)",
+    "color":"b",
+    "xsec":49680,
+    "filter":1.0,
+    "BR":0.06
+  },
+  {
+    "identifier":"myy_55_100",
+    "name":"$\\gamma\\gamma$+jets Background ($55<m_{\\gamma\\gamma} ($GeV$)<110$)",
+    "color":"r",
+    "xsec":147860,
+    "filter":0.45653,
+    "BR":1.0
+  }
+]
