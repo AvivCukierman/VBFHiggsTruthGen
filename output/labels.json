@@ -9,25 +9,86 @@
     "cut":1.3,
     "greater":0
   },
+  "dphijj_amassdiff":{
+    "xlabel":"$\\Delta\\Phi_{jj}\\cdot|M_{jj}-M_{\\gamma\\gamma}|<15.0$ GeV",
+    "cut":1.3,
+    "greater":0
+  },
   "gam2pt":{
     "xlabel":"Subleading $\\gamma$ $p_T$",
     "cut":20,
-    "greater":1
+    "greater":1,
+    "xlim":[0,100]
   },
   "mh":{
     "xlabel":"$M_{jj\\gamma\\gamma}$",
-    "cut":20,
-    "greater":1
+    "cuts":[
+      {
+        "cut":100,
+        "greater":1
+      },
+      {
+        "cut":150,
+        "greater":0
+      }
+    ],
+    "xlim":[0,600]
+  },
+  "mh_final":{
+    "xlabel":"$M_{jj\\gamma\\gamma}$",
+    "cuts":[
+      {
+        "cut":100,
+        "greater":1
+      },
+      {
+        "cut":150,
+        "greater":0
+      }
+    ],
+    "xlim":[0,200]
+  },
+  "mjj_max":{
+    "xlabel":"Max $M_{jj}$",
+    "cut":400,
+    "greater":1,
+    "xlim":[0,1000]
+  },
+  "mjj_max_amassdiff":{
+    "xlabel":"Max $M_{jj}\\cdot|M_{jj}-M_{\\gamma\\gamma}|<15.0$ GeV",
+    "cut":400,
+    "greater":1,
+    "xlim":[0,1000]
   },
   "mjj":{
     "xlabel":"$M_{jj}$",
     "cut":0,
-    "greater":-1
+    "greater":-1,
+    "xlim":[0,60]
   },
   "gam1pt":{
     "xlabel":"Leading $\\gamma$ $p_T$",
     "cut":20,
-    "greater":1
+    "greater":1,
+    "xlim":[0,100]
+  },
+  "gam2pt":{
+    "xlabel":"Subeading $\\gamma$ $p_T$",
+    "cut":20,
+    "greater":1,
+    "xlim":[0,100]
+  },
+  "jet1pt":{
+    "xlabel":"Leading jet $p_T$",
+    "cut":20,
+    "greater":1,
+    "xlim":[0,100]
+  },
+  "jet2pt":{
+    "xlabel":"Subeading jet $p_T$",
+    "cut":20,
+    "greater":1,
+    "xlim":[0,100]
   },
   "gjmindr":{
     "xlabel":"Minimum $\\Delta R_{j\\gamma}$",
@@ -37,7 +98,8 @@
   "amassdiff":{
     "xlabel":"$|M_{jj}-M_{\\gamma\\gamma}|$",
     "cut":15,
-    "greater":0
+    "greater":0,
+    "xlim":[0,50]
   },
   "ggmindr":{
     "xlabel":"Minimum $\\Delta R_{\\gamma\\gamma}$",
@@ -47,7 +109,14 @@
   "mgamgam":{
     "xlabel":"$M_{\\gamma\\gamma}$",
     "cut":0,
-    "greater":-1
+    "greater":-1,
+    "xlim":[0,110]
+  },
+  "mgamgam_nocuts":{
+    "xlabel":"$M_{\\gamma\\gamma}$",
+    "cut":0,
+    "greater":-1,
+    "xlim":[0,110]
   },
   "jjmindr":{
     "xlabel":"Minimum $\\Delta R_{jj}$",
@@ -60,8 +129,19 @@
     "greater":0
   },
   "jetmultiplicity":{
-    "xlabel":"Jet Multiplicity",
+    "xlabel":"Jet Multiplicity ($|\\eta|<2.5$)",
     "cut":2,
     "greater":1
+  },
+  "fjetmultiplicity":{
+    "xlabel":"Jet Multiplicity ($|\\eta|<4.5$)",
+    "cut":2,
+    "greater":-1
+  },
+  "HT":{
+    "xlabel":"$H_T$",
+    "cut":0,
+    "greater":1,
+    "xlim":[0,500]
   }
 }
