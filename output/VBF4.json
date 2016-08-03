@@ -1,0 +1,17 @@
+{
+  "minjetpt":20,
+  "mingammapt":20,
+  "maxjeteta":2.5,
+  "maxVBFjeteta":4.5,
+  "maxgammaeta":2.5,
+  "s":1,
+  "minjet1pt":0,
+  "minjet2pt":0,
+  "minjet3pt":0,
+  "minjet4pt":0,
+  "mingamma1pt":0,
+  "mingamma2pt":0,
+  "HT":0,
+  "mjj":400,
+  "ggmindr":0.0
+}
