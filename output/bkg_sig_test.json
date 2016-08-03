@@ -1,7 +1,10 @@
 [
   {
-    "identifier":"test",
+    "identifier":"VBFHiggs",
     "name":"test",
-    "color":"b"
+    "color":"b",
+    "xsec":49680,
+    "filter":1.0,
+    "BR":0.06
   }
 ]
